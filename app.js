@@ -34,13 +34,11 @@ app.use(requestLogger);
 app.post('/signin', validateUser, login);
 app.post('/signup', createUser);
 
-// app.use(auth);
-
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 
 app.use(() => {
-  throw new NotFoundError('Запрашиваемый ресурс не найден');
+  throw new NotFoundError({ message: 'Запрашиваемый ресурс не найден' });
 });
 
 app.use(errorLogger);

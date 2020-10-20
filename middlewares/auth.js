@@ -28,6 +28,8 @@ const auth = (req, res, next) => {
     throw new UnauthorizedError({ message: 'Необходима авторизация' });
   }
 
+  console.log(token);
+
   req.user = payload;
 
   next();
