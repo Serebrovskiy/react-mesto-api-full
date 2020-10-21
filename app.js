@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
+const cors = require('cors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
 
@@ -13,6 +14,8 @@ const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
 
+const { PORT = 3000 } = process.env;
+
 mongoose.connect('mongodb://localhost:27017/mestodb',
   {
     useNewUrlParser: true,
@@ -21,7 +24,25 @@ mongoose.connect('mongodb://localhost:27017/mestodb',
     useUnifiedTopology: true,
   });
 
-const { PORT = 3000 } = process.env;
+const allowedCors = [
+  'https://aleks.students.nomoreparties.space',
+  'https://www.aleks.students.nomoreparties.space',
+  'http://aleks.students.nomoreparties.space',
+  'http://www.aleks.students.nomoreparties.space',
+  'localhost:3000',
+];
+
+// eslint-disable-next-line prefer-arrow-callback
+app.use(function (req, res, next) {
+  const { origin } = req.headers;
+
+  if (allowedCors.includes(origin)) {
+    res.header('Access-Control-Allow-Origin', origin);
+  }
+  next();
+});
+
+app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
