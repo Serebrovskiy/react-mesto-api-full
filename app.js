@@ -15,7 +15,7 @@ const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 
 mongoose.connect('mongodb://localhost:27017/mestodb',
   {
@@ -25,25 +25,29 @@ mongoose.connect('mongodb://localhost:27017/mestodb',
     useUnifiedTopology: true,
   });
 
-const allowedCors = [
-  'https://aleks.students.nomoreparties.space',
-  'https://www.aleks.students.nomoreparties.space',
-  'http://aleks.students.nomoreparties.space',
-  'http://www.aleks.students.nomoreparties.space',
-  'localhost:3000',
-];
+app.use(cors({
+  origin: 'http://localhost:3000',
+}));
 
-// eslint-disable-next-line prefer-arrow-callback
-app.use(function (req, res, next) {
-  const { origin } = req.headers;
+// const allowedCors = [
+//   'https://aleks.students.nomoreparties.space',
+//   'https://www.aleks.students.nomoreparties.space',
+//   'http://aleks.students.nomoreparties.space',
+//   'http://www.aleks.students.nomoreparties.space',
+//   'localhost:3000',
+// ];
 
-  if (allowedCors.includes(origin)) {
-    res.header('Access-Control-Allow-Origin', origin);
-  }
-  next();
-});
+// // eslint-disable-next-line prefer-arrow-callback
+// app.use(function (req, res, next) {
+//   const { origin } = req.headers;
 
-app.use(cors());
+//   if (allowedCors.includes(origin)) {
+//     res.header('Access-Control-Allow-Origin', origin);
+//   }
+//   next();
+// });
+
+// app.use(cors());
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
