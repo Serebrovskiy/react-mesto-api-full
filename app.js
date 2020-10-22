@@ -1,8 +1,9 @@
+const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const cors = require('cors');
+const path = require('path');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
 
@@ -49,8 +50,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-// eslint-disable-next-line spaced-comment
-//app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.post('/signin', validateUser, login);
 app.post('/signup', createUser);
