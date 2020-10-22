@@ -1,6 +1,7 @@
 const cors = require('cors');
 const express = require('express');
 const mongoose = require('mongoose');
+const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
 const path = require('path');
@@ -25,9 +26,11 @@ mongoose.connect('mongodb://localhost:27017/mestodb',
     useUnifiedTopology: true,
   });
 
-app.use(cors({
-  origin: 'http://localhost:3000',
-}));
+// app.use(cors({
+//   origin: 'http://localhost:3000',
+// }));
+
+app.use(cors());
 
 // const allowedCors = [
 //   'https://aleks.students.nomoreparties.space',
@@ -37,7 +40,7 @@ app.use(cors({
 //   'localhost:3000',
 // ];
 
-// // eslint-disable-next-line prefer-arrow-callback
+// eslint-disable-next-line prefer-arrow-callback
 // app.use(function (req, res, next) {
 //   const { origin } = req.headers;
 
@@ -47,7 +50,12 @@ app.use(cors({
 //   next();
 // });
 
-// app.use(cors());
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000,
+  max: 100,
+});
+
+app.use(limiter);
 
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -55,6 +63,12 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(requestLogger);
 
 app.use(express.static(path.join(__dirname, 'public')));
+
+app.get('/crash-test', () => { // краш-тест сервера
+  setTimeout(() => {
+    throw new Error('Сервер сейчас упадёт');
+  }, 0);
+});
 
 app.post('/signin', validateUser, login);
 app.post('/signup', createUser);

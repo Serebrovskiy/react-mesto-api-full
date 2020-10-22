@@ -7,18 +7,6 @@ console.log(JWT_SECRET);
 
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
-  // const { authorization } = req.headers;
-
-  // console.log(authorization);
-
-  // if (!authorization && !authorization.startsWith('Bearer ')) {
-  //   return res
-  //     .status(401)
-  //     .send({ message: 'Необходима авторизация!!' });
-  // }
-
-  // const token = authorization.replace('Bearer ', '');
-
   const token = req.headers.authorization && req.headers.authorization.replace('Bearer ', '');
   let payload;
 
@@ -27,8 +15,6 @@ const auth = (req, res, next) => {
   } catch (err) {
     throw new UnauthorizedError({ message: 'Необходима авторизация' });
   }
-
-  console.log(token);
 
   req.user = payload;
 
