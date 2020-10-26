@@ -8,36 +8,33 @@ module.exports.createCard = (req, res, next) => {
   const { name, link } = req.body;
 
   Card.create({ name, link, owner: _id })
+    .catch(() => {
+      throw new BadRequestError();
+    })
     .then((card) => {
-      res.send({ data: card });
+      res.send(card);
     })
-    .catch((err) => {
-      if (err.name === 'ValidationError') {
-        throw new BadRequestError({ message: 'Переданы некорректные данные' });
-      }
-    })
+
     .catch(next);
 };
 
 module.exports.getAllCards = (req, res, next) => {
   Card.find({})
-    .then((card) => res.status(200).send({ data: card }))
+    .then((card) => res.send(card))
     .catch(next);
 };
 
 module.exports.deleteCard = (req, res, next) => {
   Card.findByIdAndRemove(req.params.id)
-    .orFail(new Error('NotValidId'))
+    .orFail()
+    .catch(() => {
+      throw new NotFoundError('Карточка не найдена');
+    })
     .then((card) => {
       if (card.owner.toString() === req.user._id) {
-        res.send({ data: card });
+        res.send(card);
       } else {
         throw new ForbiddenError({ message: 'Вы не можете удалить данную карточку' });
-      }
-    })
-    .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError({ message: 'Карточка не найдена' });
       }
     })
     .catch(next);
@@ -49,14 +46,12 @@ module.exports.addLikeCard = (req, res, next) => {
     { $addToSet: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new Error('NotValidId'))
-    .then((card) => {
-      res.send({ data: card });
+    .orFail()
+    .catch(() => {
+      throw new NotFoundError('Карточка не найдена');
     })
-    .catch((err) => {
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError({ message: 'Карточка не найдена' });
-      }
+    .then((card) => {
+      res.send(card);
     })
     .catch(next);
 };
@@ -67,15 +62,12 @@ module.exports.removeLikeCard = (req, res, next) => {
     { $pull: { likes: req.user._id } },
     { new: true },
   )
-    .orFail(new Error('NotValidId'))
-    .then((card) => {
-      res.send({ data: card });
+    .orFail()
+    .catch(() => {
+      throw new NotFoundError('Карточка не найдена');
     })
-    .catch((err) => {
-      console.log(err.message);
-      if (err.message === 'NotValidId') {
-        throw new NotFoundError({ message: 'Карточка не найдена' });
-      }
+    .then((card) => {
+      res.send(card);
     })
     .catch(next);
 };

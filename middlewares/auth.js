@@ -3,8 +3,6 @@ const UnauthorizedError = require('../errors/unauthorized-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-console.log(JWT_SECRET);
-
 // eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.replace('Bearer ', '');

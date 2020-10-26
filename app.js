@@ -16,7 +16,7 @@ const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
 
-const { PORT = 3000 } = process.env;
+const { PORT = 3001 } = process.env;
 
 mongoose.connect('mongodb://localhost:27017/mestodb',
   {
@@ -54,8 +54,8 @@ app.post('/signup', createUser);
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
 
-app.use(() => {
-  throw new NotFoundError({ message: 'Запрашиваемый ресурс не найден' });
+app.all('*', (req, res, next) => {
+  next(new NotFoundError('Запрашиваемый ресурс не найден'));
 });
 
 app.use(errorLogger);
