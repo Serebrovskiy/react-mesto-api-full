@@ -4,6 +4,7 @@ const User = require('../models/user');
 const NotFoundError = require('../errors/not-found-err');
 // const BadRequestError = require('../errors/bad-request-error');
 const ConflictError = require('../errors/conflict-error');
+const UnauthorizedError = require('../errors/unauthorized-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
@@ -25,10 +26,12 @@ module.exports.createUser = (req, res, next) => {
       avatar,
     }))
     .then((user) => {
-      res.send(user);
+      const userPassword = user;
+      userPassword.password = '';
+      res.send(userPassword);
     })
     .catch((err) => {
-      if (err.code === 11000) {
+      if (err.name === 'MongoError' && err.code === 11000) {
         next(new ConflictError('Такой пользователь уже есть'));
       } else next(err);
     });
@@ -46,7 +49,7 @@ module.exports.login = (req, res, next) => {
       );
       res.send({ token });
     })
-    .catch(next);
+    .catch(() => next(new UnauthorizedError('Введены неверное имя или пароль')));
 };
 
 module.exports.getUsers = (req, res, next) => {
@@ -57,10 +60,16 @@ module.exports.getUsers = (req, res, next) => {
 
 module.exports.getCurrentUser = (req, res, next) => {
   User.findById(req.user._id)
-    .orFail()
-    .catch(() => {
-      throw new NotFoundError('Пользователь не найден');
-    })
+    .orFail(new NotFoundError('Пользователь не найден'))
+    .then((user) => res.send(user))
+    .catch(next);
+};
+
+module.exports.getUserById = (req, res, next) => {
+  const { id } = req.params;
+  console.log(req.params);
+  User.findById(id)
+    .orFail(new NotFoundError('Пользователь не найден'))
     .then((user) => res.send(user))
     .catch(next);
 };

@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
-const { errors } = require('celebrate');
+const { errors, CelebrateError } = require('celebrate');
 const path = require('path');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
@@ -15,6 +15,7 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
+const BadRequestError = require('./errors/bad-request-error');
 
 const { PORT = 3001 } = process.env;
 
@@ -49,7 +50,8 @@ app.get('/crash-test', () => {
 });
 
 app.post('/signin', validateUser, login);
-app.post('/signup', createUser);
+// eslint-disable-next-line no-multi-spaces
+app.post('/signup', validateUser, createUser);    // надо проверить
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
@@ -62,9 +64,15 @@ app.use(errorLogger);
 
 app.use(errors());
 
-// eslint-disable-next-line no-unused-vars
 app.use((err, req, res, next) => {
-  res.status(err.statusCode || 500).send({ message: err.message });
+  let error = err;
+  if (error instanceof CelebrateError) { error = new BadRequestError('Плохой запрос'); }
+  const { status = 500, message } = error;
+
+  res.status(status).send(status === 500 ? 'На сервере произошла ошибка' : message);
+
+  // res.status(err.status || 500).send(err.message);
+  next();
 });
 
 app.listen(PORT, () => {
