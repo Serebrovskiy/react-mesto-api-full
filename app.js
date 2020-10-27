@@ -3,7 +3,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
-const { errors, CelebrateError } = require('celebrate');
+const { errors } = require('celebrate');
 const path = require('path');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
@@ -15,7 +15,7 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
-const BadRequestError = require('./errors/bad-request-error');
+// const BadRequestError = require('./errors/bad-request-error');
 
 const { PORT = 3001 } = process.env;
 
@@ -65,13 +65,7 @@ app.use(errorLogger);
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  let error = err;
-  if (error instanceof CelebrateError) { error = new BadRequestError('Плохой запрос'); }
-  const { status = 500, message } = error;
-
-  res.status(status).send(status === 500 ? 'На сервере произошла ошибка' : message);
-
-  // res.status(err.status || 500).send(err.message);
+  res.status(err.status || 500).send(err.message);
   next();
 });
 

@@ -1,4 +1,4 @@
-const { celebrate, Joi } = require('celebrate');
+const { celebrate, Joi, CelebrateError } = require('celebrate');
 const { isURL } = require('validator');
 
 const validateUser = celebrate({
@@ -18,8 +18,8 @@ const validateUserUpdate = celebrate({
 const validateCard = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(40),
-    link: Joi.string().required().custom((value, helpers) => {
-      if (!isURL(value)) return helpers.error('Невалидная ссылка');
+    link: Joi.string().required().custom((value) => {
+      if (!isURL(value)) return new CelebrateError();
       return value;
     }),
   }),
@@ -33,8 +33,8 @@ const validateId = celebrate({
 
 const validateAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().required().custom((value, helpers) => {
-      if (!isURL(value)) return helpers.error('Невалидная ссылка');
+    avatar: Joi.string().required().custom((value) => {
+      if (!isURL(value)) return new CelebrateError();
       return value;
     }),
   }),
