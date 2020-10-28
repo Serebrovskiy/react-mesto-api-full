@@ -4,7 +4,6 @@ const mongoose = require('mongoose');
 const rateLimit = require('express-rate-limit');
 const bodyParser = require('body-parser');
 const { errors } = require('celebrate');
-const path = require('path');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 require('dotenv').config();
 
@@ -15,7 +14,6 @@ const { createUser, login } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const { validateUser } = require('./middlewares/requestValidation');
 const NotFoundError = require('./errors/not-found-err');
-// const BadRequestError = require('./errors/bad-request-error');
 
 const { PORT = 3001 } = process.env;
 
@@ -41,8 +39,6 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-app.use(express.static(path.join(__dirname, 'public')));
-
 app.get('/crash-test', () => {
   setTimeout(() => {
     throw new Error('Сервер сейчас упадёт');
@@ -50,8 +46,7 @@ app.get('/crash-test', () => {
 });
 
 app.post('/signin', validateUser, login);
-// eslint-disable-next-line no-multi-spaces
-app.post('/signup', validateUser, createUser);    // надо проверить
+app.post('/signup', validateUser, createUser);
 
 app.use('/users', auth, usersRouter);
 app.use('/cards', auth, cardsRouter);
@@ -65,7 +60,7 @@ app.use(errorLogger);
 app.use(errors());
 
 app.use((err, req, res, next) => {
-  res.status(err.status || 500).send(err.message);
+  res.status(err.status || 500).send({ message: err.status === 500 ? 'Ошибка сервера' : err.message });
   next();
 });
 

@@ -11,15 +11,15 @@ const validateUser = celebrate({
 const validateUserUpdate = celebrate({
   body: Joi.object().keys({
     name: Joi.string().required().min(2).max(30),
-    about: Joi.string().required().min(2).max(100),
+    about: Joi.string().required().min(2).max(30),
   }),
 });
 
 const validateCard = celebrate({
   body: Joi.object().keys({
-    name: Joi.string().required().min(2).max(40),
+    name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().custom((value) => {
-      if (!isURL(value)) return new CelebrateError();
+      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
       return value;
     }),
   }),
@@ -34,7 +34,7 @@ const validateId = celebrate({
 const validateAvatar = celebrate({
   body: Joi.object().keys({
     avatar: Joi.string().required().custom((value) => {
-      if (!isURL(value)) return new CelebrateError();
+      if (!isURL(value)) throw new CelebrateError('Некорректный URL');
       return value;
     }),
   }),

@@ -3,7 +3,6 @@ const UnauthorizedError = require('../errors/unauthorized-error');
 
 const { NODE_ENV, JWT_SECRET } = process.env;
 
-// eslint-disable-next-line consistent-return
 const auth = (req, res, next) => {
   const token = req.headers.authorization && req.headers.authorization.replace('Bearer ', '');
   let payload;
@@ -11,7 +10,7 @@ const auth = (req, res, next) => {
   try {
     payload = jwt.verify(token, `${NODE_ENV === 'production' ? JWT_SECRET : 'dev-secret'}`);
   } catch (err) {
-    throw new UnauthorizedError({ message: 'Необходима авторизация' });
+    throw new UnauthorizedError('Необходима авторизация');
   }
 
   req.user = payload;
